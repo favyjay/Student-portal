@@ -1,188 +1,118 @@
-/* =========================================
-   1. CONFIGURATION & DATA
-   ========================================= */
+// Sample Data
+const courseData = [
+    { name: "Introduction to Engineering", code: "ENG 101" },
+    { name: "Digital Logic Design", code: "CSC 204" },
+    { name: "Technical Communication", code: "GNS 102" },
+    { name: "Applied Mathematics II", code: "MTH 202" }
+];
+
 const portalData = {
     admin: {
         role: "Administrator",
-        menu: ["User Management", "System Health", "Audit Logs", "Settings"],
-        tabs: [
-            { i: "fa-house", t: "Home" },
-            { i: "fa-chart-line", t: "Analytics" },
-            { i: "fa-gear", t: "Setup" }
-        ],
-        // Using Design System Classes instead of Inline Styles
-        html: `
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:32px">
-                <div class="role-card" style="flex-direction: column; align-items: flex-start; cursor: default;">
-                    <h2 class="heading-page" style="color: var(--primary);">0</h2>
-                    <p class="label text-muted" style="text-transform:uppercase; letter-spacing: 0.5px;">Students</p>
-                </div>
-                <div class="role-card" style="flex-direction: column; align-items: flex-start; cursor: default;">
-                    <h2 class="heading-page" style="color: var(--secondary);">0</h2>
-                    <p class="label text-muted" style="text-transform:uppercase; letter-spacing: 0.5px;">Faculties</p>
-                </div>
-            </div>
-            
-            <h3 class="heading-section" style="margin-bottom: 16px;">System Activity</h3>
-            <div class="role-card" style="cursor: default; display: block;">
-                <p class="body-large text-muted">All systems operational.</p>
-            </div>
-        `
+        menu: ["Dashboard", "Upload PDF", "Logs", "Settings"],
+        tabs: [{i:"fa-house", t:"Home"}, {i:"fa-file-pdf", t:"Files"}, {i:"fa-gear", t:"Setup"}],
+        homeHtml: `<h3>Admin Overview</h3><div class="role-card" style="display:block"><h4>System Status</h4><p class="text-muted">All servers are running normally. No pending flags.</p></div>`
     },
     student: {
         role: "Student",
-        menu: ["My Courses", "Examination", "Results", "Fees"],
-        tabs: [
-            { i: "fa-house", t: "Home" },
-            { i: "fa-book", t: "Courses" },
-            { i: "fa-poll", t: "Results" }
-        ],
-        html: `
-            <div style="background: var(--text-dark); color: white; padding: 24px; border-radius: var(--radius-card); margin-bottom: 24px; box-shadow: var(--shadow);">
-                <h3 class="heading-sub" style="color: white; margin-bottom: 8px;">Welcome back!</h3>
-                <p class="body-regular" style="opacity: 0.9;">You have 2 pending assignments to complete this week.</p>
-            </div>
-            
-            <div class="role-card" style="cursor: default; display: block;">
-                <h4 class="heading-sub" style="margin-bottom: 12px;">Recent Activity</h4>
-                <p class="body-small text-muted">No new notifications at this time.</p>
-            </div>
-        `
+        menu: ["Dashboard", "Course List", "Downloads"],
+        tabs: [{i:"fa-house", t:"Home"}, {i:"fa-book", t:"Courses"}, {i:"fa-download", t:"Files"}],
+        homeHtml: `<div style="background:var(--text-dark); color:white; padding:25px; border-radius:15px; margin-bottom:20px;"><h3>Welcome back!</h3><p>You have 3 new study materials available.</p></div>`
     },
     cr: {
         role: "Course Rep",
-        menu: ["Class List", "Attendance", "Broadcasts"],
-        tabs: [
-            { i: "fa-house", t: "Home" },
-            { i: "fa-bullhorn", t: "Posts" },
-            { i: "fa-calendar", t: "Schedule" }
-        ],
-        html: `
-            <div class="role-card" style="cursor: default; display: block; border-color: var(--primary);">
-                <h4 class="heading-sub" style="margin-bottom: 4px;">Quick Announcement</h4>
-                <p class="body-small text-muted" style="margin-bottom: 16px;">This will be sent to all students in your class.</p>
-                
-                <textarea 
-                    style="width:100%; padding:12px; border-radius:var(--radius-btn); border:1px solid #E5E7EB; background:var(--bg-light); font-family:inherit; outline:none; height:100px; resize: none; margin-bottom: 16px;" 
-                    placeholder="Type your message here..."></textarea>
-                
-                <button class="btn btn-primary" style="width: 100%;">Post to Class Feed</button>
-            </div>
-        `
+        menu: ["Dashboard", "Course List", "Uploads", "Downloads", "Broadcasts"],
+        tabs: [{i:"fa-house", t:"Home"}, {i:"fa-upload", t:"Upload"}, {i:"fa-bullhorn", t:"Post"}],
+        homeHtml: `<div class="role-card" style="display:block; border-color:var(--primary)"><h3>Class Bulletin</h3><p class="text-muted">Send alerts or reminders to the class list instantly.</p></div>`
     }
 };
 
-/* =========================================
-   2. CORE LOGIC (NAVIGATION)
-   ========================================= */
+let activeRole = "";
 
-/**
- * Transition from Landing Page to Main App
- * @param {string} type - 'admin', 'student', or 'cr'
- */
-function enterPortal(type) {
-    const data = portalData[type];
+// 1. Persistence: Check for session on load
+window.onload = () => {
+    const savedRole = localStorage.getItem('cram_session');
+    if(savedRole) enterPortal(savedRole);
+};
+
+function enterPortal(role) {
+    activeRole = role;
+    localStorage.setItem('cram_session', role);
     
-    // 1. Populate Text Data
+    const data = portalData[role];
     document.getElementById('userRole').innerText = data.role;
-    // document.getElementById('pageTitle').innerText = data.role + " Portal"; // Uncomment if you have a page title element
+    document.getElementById('content').innerHTML = data.homeHtml;
     
-    // 2. Inject HTML Content
-    document.getElementById('content').innerHTML = data.html;
+    // Build Sidebar
+    document.getElementById('menuList').innerHTML = data.menu.map((m, i) => 
+        `<li class="${i===0?'active':''}" onclick="navigate('${m}', this)">${m}</li>`).join('');
     
-    // 3. Generate Sidebar Menu
-    document.getElementById('menuList').innerHTML = data.menu
-        .map((m, index) => `<li class="${index === 0 ? 'active' : ''}">${m}</li>`)
-        .join('');
-    
-    // 4. Generate Mobile Bottom Dock
-    const bottomNav = document.getElementById('bottomNav');
-    if (bottomNav) {
-        bottomNav.innerHTML = data.tabs.map((tab, i) => `
-            <a href="#" class="dock-item ${i === 0 ? 'active' : ''}">
-                <i class="fas ${tab.i}"></i>
-                <span>${tab.t}</span>
-            </a>
-        `).join('');
-    }
-    
-    // 5. Handle View Transition (Smooth Fade)
-    const landing = document.getElementById('landingPage');
-    const app = document.getElementById('appShell'); // Ensure your main div has this ID class="app-container"
-    
-    landing.style.opacity = '0';
-    landing.style.pointerEvents = 'none'; // Prevent clicks during fade
-    
-    setTimeout(() => {
-        landing.style.display = 'none';
-        
-        // Flex is required for the layout to work as defined in CSS
-        app.style.display = 'flex'; 
-        app.classList.add('fade-in'); // Optional: Add a CSS animation class here
-    }, 300);
+    // Build Dock
+    const dock = document.getElementById('bottomNav');
+    if(dock) dock.innerHTML = data.tabs.map((tab, i) => 
+        `<a href="#" class="dock-item ${i===0?'active':''}" onclick="navigate('${tab.t}', this, true)">
+            <i class="fas ${tab.i}"></i><span>${tab.t}</span></a>`).join('');
+
+    document.getElementById('landingPage').style.display = 'none';
+    document.getElementById('appShell').style.display = 'flex';
 }
 
-/**
- * Log out and return to landing page
- */
-function logout() {
-    const landing = document.getElementById('landingPage');
-    const app = document.getElementById('appShell');
-
-    app.style.display = 'none';
-    landing.style.display = 'flex';
+function navigate(view, el, isDock = false) {
+    const content = document.getElementById('content');
+    document.getElementById('pageTitle').innerText = view;
     
-    // Small delay to allow display:flex to apply before changing opacity
-    setTimeout(() => {
-        landing.style.opacity = '1';
-        landing.style.pointerEvents = 'all';
-    }, 10);
-    
-    // Reset Drawer
+    // UI Active State
+    document.querySelectorAll(isDock ? '.dock-item' : '.main-menu li').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
     toggleDrawer(false);
-}
 
-/* =========================================
-   3. UI INTERACTION & EVENTS
-   ========================================= */
-
-/**
- * Toggle Mobile Sidebar
- * @param {boolean} open - true to open, false to close
- */
-function toggleDrawer(open) {
-    const drawer = document.getElementById('drawer'); // Ensure sidebar has id="drawer"
-    const overlay = document.getElementById('overlay');
-    
-    if (open) {
-        drawer.classList.add('active');
-        overlay.classList.add('active');
-    } else {
-        drawer.classList.remove('active');
-        overlay.classList.remove('active');
+    // View Routing
+    if(view === "Dashboard" || view === "Home") {
+        content.innerHTML = portalData[activeRole].homeHtml;
+    } 
+    else if(view.includes("Course List") || view === "Courses") {
+        content.innerHTML = `<h3>My Course List</h3>` + courseData.map(c => `
+            <div class="role-card" style="justify-content:space-between">
+                <div><h4 style="margin:0">${c.name}</h4><span class="label text-muted">${c.code}</span></div>
+                <i class="fas fa-check-circle" style="color:var(--secondary)"></i>
+            </div>`).join('');
+    }
+    else if(view.includes("Upload")) {
+        content.innerHTML = `<h3>Upload Center</h3>
+            <div class="upload-box" onclick="document.getElementById('fileIn').click()">
+                <i class="fas fa-cloud-arrow-up" style="font-size:40px; color:var(--primary); margin-bottom:10px"></i>
+                <h4>Tap to select file</h4><p class="text-muted">PDF or Document formats preferred</p>
+                <input type="file" id="fileIn" hidden onchange="alert('Uploaded: ' + this.files[0].name)">
+            </div>`;
+    }
+    else if(view.includes("Download") || view === "Files") {
+        content.innerHTML = `<h3>Downloads</h3>
+            <div class="role-card" onclick="alert('Downloading...')">
+                <i class="fas fa-file-pdf" style="color:var(--danger); font-size:24px"></i>
+                <div style="flex:1"><h4>Module_01_Notes.pdf</h4><p class="text-muted">1.2 MB</p></div>
+                <i class="fas fa-download" style="color:var(--primary)"></i>
+            </div>`;
+    }
+    else {
+        content.innerHTML = `<p class="text-muted">Interface for ${view} coming soon.</p>`;
     }
 }
 
-/**
- * Synchronize Profile Picture Upload
- * @param {HTMLInputElement} input 
- */
+function logout() { localStorage.removeItem('cram_session'); location.reload(); }
+
+function toggleDrawer(open) {
+    document.getElementById('drawer').classList.toggle('active', open);
+    document.getElementById('overlay').classList.toggle('active', open);
+}
+
 function syncPfp(input) {
     if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            const imgHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
-            
-            // Update Sidebar PFP
-            const sidePfp = document.getElementById('sidePfp');
-            if(sidePfp) sidePfp.innerHTML = imgHTML;
-            
-            // Update Header PFP
-            const headPfp = document.getElementById('headPfp');
-            if(headPfp) headPfp.innerHTML = imgHTML;
+        let r = new FileReader();
+        r.onload = (e) => {
+            let img = `<img src="${e.target.result}">`;
+            document.getElementById('sidePfp').innerHTML = img;
+            document.getElementById('headPfp').innerHTML = img;
         };
-        
-        reader.readAsDataURL(input.files[0]);
+        r.readAsDataURL(input.files[0]);
     }
 }
