@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CRAM | Premium Portal</title>
-    <!-- Icons and Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -14,9 +13,7 @@
     <!-- LANDING PAGE -->
     <div id="landingPage">
         <div class="landing-content">
-            <div class="logo-wrapper">
-                <h1 class="logo">CRAM</h1>
-            </div>
+            <h1 class="logo">CRAM</h1>
             <p class="subtitle">Select your workspace to continue</p>
             
             <div class="role-selector">
@@ -24,7 +21,7 @@
                     <div class="icon-box s-bg"><i class="fas fa-user-graduate"></i></div>
                     <div class="role-text">
                         <h3>Student</h3>
-                        <p>Results, Courses & Library</p>
+                        <p>Courses & Downloads</p>
                     </div>
                     <i class="fas fa-chevron-right"></i>
                 </div>
@@ -33,7 +30,7 @@
                     <div class="icon-box c-bg"><i class="fas fa-users-gear"></i></div>
                     <div class="role-text">
                         <h3>Course Rep</h3>
-                        <p>Class Management & News</p>
+                        <p>Class Management & Uploads</p>
                     </div>
                     <i class="fas fa-chevron-right"></i>
                 </div>
@@ -42,7 +39,7 @@
                     <div class="icon-box a-bg"><i class="fas fa-shield-halved"></i></div>
                     <div class="role-text">
                         <h3>Administrator</h3>
-                        <p>System Control & Logs</p>
+                        <p>PDF Control & System Logs</p>
                     </div>
                     <i class="fas fa-chevron-right"></i>
                 </div>
@@ -52,14 +49,12 @@
 
     <!-- APP SHELL -->
     <div id="appShell" class="app-container">
-        
-        <!-- SIDEBAR (Drawer for Mobile, Fixed for Desktop) -->
         <div class="overlay" id="overlay" onclick="toggleDrawer(false)"></div>
+        
         <aside class="sidebar" id="drawer">
             <div class="sidebar-header">
                 <div class="profile-upload" onclick="document.getElementById('pfpIn').click()">
                     <div class="pfp-frame" id="sidePfp">--</div>
-                    <div class="pfp-badge"><i class="fas fa-pen"></i></div>
                     <input type="file" id="pfpIn" hidden accept="image/*" onchange="syncPfp(this)">
                 </div>
                 <h3 id="userNameDisplay">User Name</h3>
@@ -68,27 +63,20 @@
 
             <nav class="nav-container">
                 <ul id="menuList" class="main-menu"></ul>
-                <div class="nav-footer">
-                    <button class="logout-btn" onclick="location.reload()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </div>
+                <button class="btn logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </nav>
         </aside>
 
-        <!-- MAIN VIEW -->
         <div class="main-view">
             <header class="app-header">
-                <button class="header-btn" onclick="toggleDrawer(true)">
-                    <i class="fas fa-bars-staggered"></i>
-                </button>
+                <button class="header-btn" onclick="toggleDrawer(true)"><i class="fas fa-bars-staggered"></i></button>
                 <h2 id="pageTitle">Dashboard</h2>
                 <div class="header-pfp" id="headPfp">--</div>
             </header>
 
             <main class="content-body" id="content"></main>
-
-            <!-- MOBILE FLOATING DOCK -->
             <nav class="mobile-dock" id="bottomNav"></nav>
         </div>
     </div>
